@@ -1,0 +1,28 @@
+#include "Common.ush"
+
+float4 MipGenerationParams;
+RWTexture2D<float4> RWTexture0; // Current mip
+RWTexture2D<float4> RWTexture1; // Next mip
+
+[numthreads(8,8,1)]
+void GenerateMipsMain(uint3 DispatchThreadId : SV_DispatchThreadID)
+{
+	const uint2 PixelPos = DispatchThreadId.xy + 1;
+
+	uint2 Offsets[] =
+	{
+		uint2(0, 0),
+		uint2(0, 1),
+		uint2(1, 0),
+		uint2(1, 1),
+	};
+
+	float4 FinalColor = 0;
+
+	for (int i = 0; i < 4; ++i)
+	{
+		FinalColor += RWTexture0[2 * PixelPos + Offsets[i]];
+	}
+	
+	RWTexture1[PixelPos] = FinalColor * 0.25f;
+}
